@@ -1,0 +1,49 @@
+import utils.Date;
+
+CREATE TABLE IF NOT EXISTS  Fix
+(
+    id        INTEGER PRIMARY KEY AUTOINCREMENT,
+    name      TEXT NOT NULL,
+    date INTEGER AS Date NOT NULL,
+    authorId INTEGER REFERENCES Author,
+    repoId   INTEGER REFERENCES Repo
+);
+
+
+insert:
+INSERT INTO Fix (name, date, authorId, repoId)
+VALUES ( ?, ?, ?, ?);
+
+
+getAll:
+SELECT * FROM Fix
+WHERE Fix.repoId = :repoId
+ORDER BY date;
+
+get:
+SELECT * FROM Fix
+WHERE Fix.id = :id;
+
+getLatest:
+SELECT DISTINCT * FROM Fix
+WHERE repoId = :repoId
+AND date IN (SELECT MAX(date) FROM Fix);
+
+deleteLastest:
+DELETE FROM Fix
+WHERE repoId = :repoId
+AND date IN (SELECT MAX(date) FROM Fix);
+
+byFile:
+SELECT * FROM Fix
+INNER JOIN FileToFix ON Fix.id = FileToFix.fixId
+INNER JOIN FileData ON FileData.id = FileToFix.fileId
+AND FileData.repoId = Fix.repoId
+WHERE FileData.name = :fileName;
+
+lastInsertRowId:
+SELECT last_insert_rowid();
+
+delete:
+DELETE FROM Fix
+WHERE id = :id;

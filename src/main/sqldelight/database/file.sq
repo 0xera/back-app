@@ -1,0 +1,70 @@
+import model.domain.Status;
+
+CREATE TABLE IF NOT EXISTS  FileData
+(
+    id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    name    TEXT NOT NULL,
+    status   TEXT as Status NOT NULL,
+    data    BLOB DEFAULT NULL,
+    repoId   INTEGER REFERENCES Repo
+);
+
+
+insert {
+INSERT INTO FileData(name, status, data, repoId)
+VALUES (?, ? , ?, ?);
+SELECT last_insert_rowid() FROM FileData;
+}
+
+-- updateStatus{
+-- UPDATE FILE
+-- SET STATUS = :status
+-- WHERE ID = :id;
+-- SELECT changes() FROM FILE;
+-- }
+
+getAll:
+SELECT * FROM FileData
+WHERE FileData.repoId = :repoId;
+
+
+getLatestFiles:
+SELECT * FROM FileData
+INNER JOIN FileToFix ON FileData.id = FileToFix.fileId
+INNER JOIN Fix ON Fix.id = FileToFix.fixId
+AND FileData.repoId = Fix.repoId
+INNER JOIN (
+SELECT FileData.name, MAX(Fix.date) AS DATE FROM FileData
+INNER JOIN FileToFix ON FileData.id = FileToFix.fileId
+INNER JOIN Fix ON Fix.id = FileToFix.fixId
+AND FileData.repoId = Fix.repoId
+GROUP BY FileData.name
+) AS Last ON Last.DATE = Fix.date AND Last.name = FileData.name
+WHERE FileData.repoId = :repoID;
+
+
+byFix:
+SELECT * FROM FileData
+INNER JOIN FileToFix ON FileData.id = FileToFix.fileId
+INNER JOIN Fix ON Fix.id = FileToFix.fixId
+AND FileData.repoId = Fix.repoId
+WHERE Fix.id = :commitId;
+
+
+lastInsertRowId:
+SELECT last_insert_rowid();
+
+delete:
+DELETE FROM FileData
+WHERE id = :id;
+
+get:
+SELECT * FROM FileData
+WHERE id = :id;
+
+CREATE TRIGGER IF NOT EXISTS DELETE_FILE_TO_COMMIT
+AFTER DELETE ON FileToFix
+BEGIN
+     DELETE FROM FileData WHERE id = old.fileId;
+END;
+

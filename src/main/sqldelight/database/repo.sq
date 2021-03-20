@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS Repo
+(
+    id   INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL
+
+);
+
+get:
+SELECT * FROM Repo
+WHERE id = :repoId;
+
+
+insert {
+INSERT INTO Repo(name)
+VALUES (?);
+SELECT last_insert_rowid() FROM Repo;
+}
+
+lastInsertRowId:
+SELECT last_insert_rowid();

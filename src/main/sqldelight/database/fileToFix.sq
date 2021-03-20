@@ -1,0 +1,40 @@
+CREATE TABLE IF NOT EXISTS FileToFix
+(
+    fixId INTEGER REFERENCES Fix (id) NOT NULL,
+    fileId   INTEGER REFERENCES FileData (id) NOT NULL
+
+);
+
+insert {
+INSERT INTO FileToFix(fixId, fileId)
+VALUES (?, ?);
+SELECT last_insert_rowid() FROM FileToFix;
+}
+
+
+lastInsertRowId:
+SELECT last_insert_rowid();
+
+getAll:
+SELECT * FROM
+FileToFix
+ORDER BY fixId DESC ;
+
+getByFix:
+SELECT * FROM
+FileToFix
+WHERE fixId = :id;
+
+deleteByFixId:
+DELETE FROM FileToFix
+WHERE fixId = :id;
+
+deleteByFileId:
+DELETE FROM FileToFix
+WHERE fileId = :id;
+
+CREATE TRIGGER IF NOT EXISTS DELETE_FIX
+AFTER DELETE ON Fix
+BEGIN
+     DELETE FROM FileToFix WHERE fixId = old.id;
+END;

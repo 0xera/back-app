@@ -1,0 +1,40 @@
+CREATE TABLE IF NOT EXISTS Author
+(
+    id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    nickname TEXT NOT NULL,
+    email    TEXT NOT NULL
+
+);
+
+
+getByFix:
+SELECT * FROM Author
+INNER JOIN Fix ON Author.id = Fix.authorId
+AND Fix.id = :fixId;
+
+
+insert{
+INSERT INTO Author(nickname, email)
+VALUES (?, ?);
+SELECT last_insert_rowid() FROM Author;}
+
+lastInsertRowId:
+SELECT last_insert_rowid();
+
+getAll:
+SELECT * FROM Author;
+
+
+byName:
+SELECT * FROM Author
+WHERE nickname = :nickname;
+
+byEmail:
+SELECT * FROM Author
+WHERE email = :email;
+
+get:
+SELECT * FROM Author
+WHERE id = :id;
+
+

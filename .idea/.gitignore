@@ -1,0 +1,13 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Datasource local storage ignored files
+/../../../../../../:\Users\winda\IdeaProjects\database-git\.idea/dataSources/
+/dataSources.local.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+../.gradle
+../build
+../.idea
+../BackupDatabase.db
+../build/generated/sqldelight/code/BackupDatabase/
