@@ -21,6 +21,7 @@ class RepositoryImpl(private val backupDatabase: BackupDatabase) : Repository {
             insert(file.parentFile.name)
             lastInsertRowId().executeAsOne()
         }
+
         file.apply {
             writeText(repoId.toString())
             setReadable(true)
@@ -61,7 +62,7 @@ class RepositoryImpl(private val backupDatabase: BackupDatabase) : Repository {
         for (file in listFiles) {
             backupDatabase.run {
                 val fileStatus = getFileStatus(file, lastFiles)
-                fileQueries.insert(file.name, fileStatus, file.readBytes(), repo.id)
+                fileQueries.insert(file.name, fileStatus, file.readBytes(), file.length(), repo.id)
                 val fileId = fileQueries.lastInsertRowId().executeAsOne()
                 fileToFixQueries.insert(fixId, fileId)
             }
@@ -75,7 +76,7 @@ class RepositoryImpl(private val backupDatabase: BackupDatabase) : Repository {
 
         for (file in deletedFiles) {
             backupDatabase.run {
-                fileQueries.insert(file.name, Status.Deleted, null, repo.id)
+                fileQueries.insert(file.name, Status.Deleted, null, file.fileSize, repo.id)
                 val fileId = fileQueries.lastInsertRowId().executeAsOne()
                 fileToFixQueries.insert(fixId, fileId)
             }
@@ -115,7 +116,9 @@ class RepositoryImpl(private val backupDatabase: BackupDatabase) : Repository {
     }
 
     private fun getFileStatus(file: File, lastFiles: List<FileData>): Status {
-        return if (file.name in lastFiles.map { it.name }) {
+        val firstFile = lastFiles.firstOrNull { it.name == file.name }
+        return if (firstFile != null) {
+            if (firstFile.fileSize == file.length()) Status.NotChanged
             if (checkContent(file.readBytes(), lastFiles)) Status.NotChanged else Status.Modified
         } else {
             if (checkContent(file.readBytes(), lastFiles)) Status.Renamed else Status.Created
@@ -168,7 +171,7 @@ class RepositoryImpl(private val backupDatabase: BackupDatabase) : Repository {
 
     }
 
-    override suspend fun reset(path: String, author: Author, repo: Repo, arguments: Map<String, String>): ShowDto? {
+    override suspend fun reset(path: String, author: Author, repo: Repo, arguments: Map<String, String>): ShowDto {
         backupDatabase.fixQueries.deleteLastest(repo.id)
         if (arguments.containsKey("hard")) {
             rollback(path, author, repo)

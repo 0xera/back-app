@@ -6,8 +6,4 @@ import model.domain.AuthorDto
 class AuthorUseCase(private val repository: Repository) {
 
     suspend fun create(authorDto: AuthorDto) = repository.createAuthor(authorDto)
-
-    suspend fun delete(id: Int) {
-
-    }
 }

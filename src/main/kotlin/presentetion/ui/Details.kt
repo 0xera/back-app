@@ -15,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import database.FileData
 import database.Fix
@@ -31,7 +32,8 @@ fun Details(modifier: Modifier, fixToFiles: LinkedHashMap<Fix, List<FileData>>) 
     ) {
 
         val selectedFix = mutableStateOf(fixToFiles.keys.firstOrNull())
-        val columnModifier = Modifier.weight(1f)
+        val columnModifier = Modifier
+            .fillMaxWidth()
             .fillMaxHeight()
             .padding(8.dp)
             .border(
@@ -44,40 +46,57 @@ fun Details(modifier: Modifier, fixToFiles: LinkedHashMap<Fix, List<FileData>>) 
             ).padding(start = 4.dp, end = 4.dp)
 
 
-        LazyColumn(modifier = columnModifier) {
+        Column(
+            modifier = Modifier.weight(1f)
 
+        ) {
+            Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+                Text(text = "Name", modifier = Modifier.weight(2f))
+                Divider(modifier = Modifier.width(2.dp).fillMaxHeight())
+                Text(modifier = Modifier.weight(1f), text = "Author")
+                Divider(modifier = Modifier.width(2.dp).fillMaxHeight())
+                Text(text = "Date", modifier = Modifier.weight(2f))
 
-            items(items = fixToFiles.keys.toList()) { item ->
+            }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)
-                        .clickable { selectedFix.value = item }
-                        .background(color = if (item.id == selectedFix.value?.id) Color.Blue.copy(alpha = 0.2f)
-                        else Color.Transparent),
-                    horizontalArrangement = Arrangement.SpaceBetween) {
+            LazyColumn(modifier = columnModifier) {
+                items(items = fixToFiles.keys.toList()) { item ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)
+                            .clickable { selectedFix.value = item }
+                            .background(color = if (item.id == selectedFix.value?.id) Color.Blue.copy(alpha = 0.2f)
+                            else Color.Transparent),
+                        horizontalArrangement = Arrangement.SpaceBetween) {
 
-                    Text(text = item.name, modifier = Modifier.weight(2f))
-                    Divider(modifier = Modifier.width(2.dp).fillMaxHeight())
-                    Text(modifier = Modifier.weight(1f), text = item.authorId.toString())
-                    Divider(modifier = Modifier.width(2.dp).fillMaxHeight())
-                    Text(text = item.date.format(), modifier = Modifier.weight(2f))
+                        Text(text = item.name, modifier = Modifier.weight(2f))
+                        Divider(modifier = Modifier.width(2.dp).fillMaxHeight())
+                        Text(modifier = Modifier.weight(1f), text = item.authorId.toString())
+                        Divider(modifier = Modifier.width(2.dp).fillMaxHeight())
+                        Text(text = item.date.format(), modifier = Modifier.weight(2f))
+                    }
                 }
             }
         }
-        LazyColumn(modifier = columnModifier) {
-            items(items = fixToFiles[selectedFix.value] ?: emptyList()) { item ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween) {
-                    val color = when (item.status) {
-                        Status.Created -> Color.Green
-                        Status.Modified -> Color.Blue
-                        Status.Deleted -> Color.Red
-                        Status.Renamed -> Color(0xFFFFA500)
-                        else -> Color.DarkGray
+        Column(
+            modifier = Modifier.weight(1f)
+
+        ) {
+            Text(modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center, text = "Changes")
+            LazyColumn(modifier = columnModifier) {
+                items(items = fixToFiles[selectedFix.value] ?: emptyList()) { item ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween) {
+                        val color = when (item.status) {
+                            Status.Created -> Color.Green
+                            Status.Modified -> Color.Blue
+                            Status.Deleted -> Color.Red
+                            Status.Renamed -> Color(0xFFFFA500)
+                            else -> Color.DarkGray
+                        }
+                        if (item.status != Status.NotChanged)
+                            Text(text = item.name, color = color)
                     }
-                    if (item.status != Status.NotChanged)
-                        Text(text = item.name, color = color)
                 }
             }
         }

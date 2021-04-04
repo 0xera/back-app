@@ -1,13 +1,16 @@
-import androidx.compose.animation.ExperimentalAnimationApi
+
+import androidx.compose.animation.*
 import androidx.compose.desktop.Window
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import di.di
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.collect
@@ -67,26 +70,42 @@ fun main() = Window(
             when (state) {
                 is State.Init -> InitScreen(store)
 
-                is State.CreatingConfig -> CreateConfigScreen(
-                    state as State.CreatingConfig,
-                    { path -> store.send(Msg.ConfirmCreateConfig(path)) },
-                    { store.send(Msg.CancelCreateConfig) })
+                is State.CreatingConfig -> ScreenAnimation {
+                    CreateConfigScreen(
+                        state as State.CreatingConfig,
+                        { path -> store.send(Msg.ConfirmCreateConfig(path)) },
+                        { store.send(Msg.CancelCreateConfig) })
+                }
 
-                is State.Loading -> LoadingScreen()
+                is State.Loading -> ScreenAnimation { LoadingScreen() }
 
-                is State.Show -> ShowScreen(state as State.Show, store)
+                is State.Show -> ScreenAnimation { ShowScreen(state as State.Show, store) }
 
                 else -> Box { Text("error") }
 
             }
-
-            if (showAuthorCreateFrom.value) {
+            ScreenAnimation(showAuthorCreateFrom.value) {
                 UserCreateScreen(showAuthorCreateFrom, store)
-
             }
 
         }
+
     }
+}
+
+
+@ExperimentalAnimationApi
+@Composable
+fun ScreenAnimation(visible: Boolean = true, content: @Composable () -> Unit) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = slideInVertically() + expandHorizontally(
+            expandFrom = Alignment.Start,
+        ),
+        exit = slideOutVertically() + shrinkHorizontally(shrinkTowards = Alignment.Start),
+        initiallyVisible = false,
+        content = content
+    )
 }
 
 @Composable
@@ -97,10 +116,11 @@ fun UserCreateScreen(
     val nameState = remember { mutableStateOf("") }
     val emailState = remember { mutableStateOf("") }
 
-    Column(modifier = Modifier.fillMaxSize().background(Color.White),
-        verticalArrangement = Arrangement.SpaceEvenly,
-        horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = "Create User")
+
+    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.surface),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         OutlinedTextField(
             label = { Text("Name") },
             value = nameState.value,
@@ -108,25 +128,27 @@ fun UserCreateScreen(
         OutlinedTextField(
             label = { Text("Email") },
             value = emailState.value,
-            onValueChange = { emailState.value = it })
-        Button(
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Green),
-            onClick = {
-                if (nameState.value.isNotBlank() && emailState.value.isNotBlank()) {
-                    showAuthorCreateFrom.value = false
-                    store.send(Msg.CreatedAuthor(AuthorDto(nameState.value, emailState.value)))
-                }
+            onValueChange = { emailState.value = it },
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email))
+        Row {
+            Button(
+                modifier = Modifier.padding(10.dp),
+                onClick = {
+                    if (nameState.value.isNotBlank() && emailState.value.isNotBlank()) {
+                        showAuthorCreateFrom.value = false
+                        store.send(Msg.CreatedAuthor(AuthorDto(nameState.value, emailState.value)))
+                    }
 
-            }) {
-            Text("Confirm")
-        }
-        Button(
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red),
-            onClick = {
-                showAuthorCreateFrom.value = false
-                store.send(Msg.Any)
-            }) {
-            Text("Dismiss")
+                }) {
+                Text("Confirm")
+            }
+            OutlinedButton(
+                modifier = Modifier.padding(10.dp),
+                onClick = {
+                    showAuthorCreateFrom.value = false
+                }) {
+                Text(color = MaterialTheme.colors.primary, text = "Dismiss")
+            }
         }
     }
 }

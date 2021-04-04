@@ -34,7 +34,7 @@ fun ShowScreen(
         modifier = Modifier.fillMaxWidth().fillMaxHeight(),
     ) {
         Row(
-            modifier = Modifier.weight(weight = 1f).fillMaxWidth(),
+            modifier = Modifier.weight(weight = 1f),
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.Center
         ) {

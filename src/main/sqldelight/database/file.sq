@@ -6,13 +6,14 @@ CREATE TABLE IF NOT EXISTS  FileData
     name    TEXT NOT NULL,
     status   TEXT as Status NOT NULL,
     data    BLOB DEFAULT NULL,
+    fileSize INTEGER NOT NULL,
     repoId   INTEGER REFERENCES Repo
 );
 
 
 insert {
-INSERT INTO FileData(name, status, data, repoId)
-VALUES (?, ? , ?, ?);
+INSERT INTO FileData(name, status, data, fileSize, repoId)
+VALUES (?, ? , ?, ?, ?);
 SELECT last_insert_rowid() FROM FileData;
 }
 

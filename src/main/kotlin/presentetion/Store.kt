@@ -75,7 +75,7 @@ class Store(
                 if (file != null) {
                     handleEffect(SideEffect.ReadConfigFile(file))
                 } else {
-                    handleEffect(SideEffect.CreateConfigFile(effect.path))
+                    _state.value = State.CreatingConfig(effect.path)
                 }
             }
             is SideEffect.CreateConfigFile -> {
@@ -156,9 +156,6 @@ class Store(
             actorMsg.send(msg)
         }
     }
-
-    fun onDestroy() = storeScope.cancel()
-
 }
 
 

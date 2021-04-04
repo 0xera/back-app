@@ -44,11 +44,11 @@ class DatabaseTest {
 //        database.fixQueries.insert("sample", authorId, repoId)
         val fixId = database.fixQueries.lastInsertRowId().executeAsOne()
 
-        database.fileQueries.insert("name", ByteArray(10), repoId)
+//        database.fileQueries.insert("name", ByteArray(10), repoId)
         var fileId = database.fileQueries.lastInsertRowId().executeAsOne()
         database.fileToFixQueries.insert(fixId, fileId)
 
-        database.fileQueries.insert("name", ByteArray(10), repoId)
+//        database.fileQueries.insert("name", ByteArray(10), repoId)
         fileId = database.fileQueries.lastInsertRowId().executeAsOne()
         database.fileToFixQueries.insert(fixId, fileId)
 
