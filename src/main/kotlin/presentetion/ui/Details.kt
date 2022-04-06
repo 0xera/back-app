@@ -50,10 +50,10 @@ fun Details(modifier: Modifier, fixToFiles: LinkedHashMap<Fix, List<FileData>>) 
             modifier = Modifier.weight(1f)
 
         ) {
-            Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+            Row(modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp).height(IntrinsicSize.Min)) {
                 Text(text = "Name", modifier = Modifier.weight(2f))
                 Divider(modifier = Modifier.width(2.dp).fillMaxHeight())
-                Text(modifier = Modifier.weight(1f), text = "Author")
+                Text(modifier = Modifier.weight(1f), text = "Author id")
                 Divider(modifier = Modifier.width(2.dp).fillMaxHeight())
                 Text(text = "Date", modifier = Modifier.weight(2f))
 
